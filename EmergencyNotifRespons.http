@@ -1,0 +1,6 @@
+@EmergencyNotifRespons_HostAddress = http://localhost:5168
+
+GET {{EmergencyNotifRespons_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
