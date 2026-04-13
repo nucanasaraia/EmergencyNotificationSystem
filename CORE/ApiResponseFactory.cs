@@ -1,56 +1,41 @@
-﻿namespace EmergencyNotifRespons.CORE
+﻿using System.Net;
+
+namespace EmergencyNotifRespons.CORE
 {
     public class ApiResponseFactory
     {
-        public static ApiResponse<T> SuccessResponse<T>(T data)
+        public static ApiResponse<T> Success<T>(T data, string message = "Request Successful", HttpStatusCode status = HttpStatusCode.OK)
         {
             return new ApiResponse<T>
             {
+                Status = status,
                 Data = data,
-                Status = StatusCodes.Status200OK,
-                Message = null
-            };
-        }
-
-
-        public static ApiResponse<bool> Verified(string message)
-        {
-            return new ApiResponse<bool>
-            {
-                Data = true,
-                Status = StatusCodes.Status200OK,
                 Message = message
             };
         }
 
-        public static ApiResponse<bool> BadRequestResponse(string message)
+        public static ApiResponse<T> Fail<T>(string message, HttpStatusCode status)
         {
-            return new ApiResponse<bool>
+            return new ApiResponse<T>
             {
-                Data = false,
-                Status = StatusCodes.Status400BadRequest,
-                Message = message
-            };
-        }
-
-        public static ApiResponse<bool> NotFoundResponse(string message)
-        {
-            return new ApiResponse<bool>
-            {
+                Status = status,
                 Data = default,
-                Status = StatusCodes.Status404NotFound,
-                Message = message
-            };
-        }
-        public static ApiResponse<bool> ConflictResponse(string message)
-        {
-            return new ApiResponse<bool>
-            {
-                Data = default,
-                Status = StatusCodes.Status409Conflict,
-                Message = message
+                Message = message,
             };
         }
 
+
+        public static ApiResponse<T> BadRequest<T>(string message = "Bad request")
+            => Fail<T>(message, HttpStatusCode.BadRequest);
+        public static ApiResponse<T> NotFound<T>(string message = "Not Found")
+            => Fail<T>(message, HttpStatusCode.NotFound);
+        public static ApiResponse<T> Unauthorized<T>(string message = "Unauthorized")
+           => Fail<T>(message, HttpStatusCode.Unauthorized);
+        public static ApiResponse<T> Forbidden<T>(string message = "Forbidden")
+            => Fail<T>(message, HttpStatusCode.Forbidden);
+        public static ApiResponse<T> Conflict<T>(string message = "Resource already exists")
+          => Fail<T>(message, HttpStatusCode.Conflict);
+        public static ApiResponse<T> ServerError<T>(string message = "Something went wrong")
+            => Fail<T>(message, HttpStatusCode.InternalServerError);
     }
 }
