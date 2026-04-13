@@ -53,7 +53,7 @@ namespace EmergencyNotifRespons.Controllers
 
 
         [HttpPost("broadcast")]
-        public ActionResult BroadcastNotification([FromBody] BroadcastNotificationDto dto)
+        public ActionResult BroadcastNotification([FromBody] NotificationDto dto)
         {
             var emergencyEvent = _context.EmergencyEvents.FirstOrDefault(e => e.Id == dto.EmergencyEventId);
             if (emergencyEvent == null)

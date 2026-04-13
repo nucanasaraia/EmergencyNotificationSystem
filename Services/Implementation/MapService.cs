@@ -2,7 +2,7 @@
 
 namespace EmergencyNotifRespons.Services.Implementation
 {
-    public class EmergencyNotificService : IEmergencyNotificService
+    public class MapService : IUserService
     {
     }
 }

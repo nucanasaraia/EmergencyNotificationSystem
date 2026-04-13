@@ -2,7 +2,7 @@
 
 namespace EmergencyNotifRespons.Services.Implementation
 {
-    public class VolunteerAssignmentService : IVolunteerAssignmentService
+    public class NotificationService : INotificationService
     {
     }
 }

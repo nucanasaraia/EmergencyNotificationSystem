@@ -10,10 +10,10 @@ namespace EmergencyNotifRespons.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmergencyEventService, EmergencyEventService>();
-            services.AddScoped<IEmergencyNotificService, EmergencyNotificService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVolunteerService, VolunteerService>();
-            services.AddScoped<IResourcesService, ResourcesService>();
-            services.AddScoped<IVolunteerAssignmentService, VolunteerAssignmentService>();
+            services.AddScoped<IResourceService, ResourceService>();
+            services.AddScoped<IUserService, MapService>();
             services.AddScoped<ITokenService, TokenService>();
         }
     }

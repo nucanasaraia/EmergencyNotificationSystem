@@ -2,7 +2,7 @@
 
 namespace EmergencyNotifRespons.DTOs
 {
-    public class BroadcastNotificationDto
+    public class NotificationDto
     {
         public int EmergencyEventId { get; set; }
         public string Message { get; set; }

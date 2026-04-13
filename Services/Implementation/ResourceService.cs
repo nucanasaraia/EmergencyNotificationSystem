@@ -3,7 +3,7 @@ using System.ComponentModel.Design;
 
 namespace EmergencyNotifRespons.Services.Implementation
 {
-    public class ResourcesService : IResourcesService
+    public class ResourceService : Interfaces.IResourceService
     {
     }
 }
