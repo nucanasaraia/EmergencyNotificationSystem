@@ -12,7 +12,7 @@ namespace EmergencyNotifRespons.Extensions
             services.AddScoped<IEmergencyEventService, EmergencyEventService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVolunteerService, VolunteerService>();
-            services.AddScoped<IResourceService, ResourceService>();
+            services.AddScoped<IResourcesService, ResourcesService>();
             services.AddScoped<IUserService, MapService>();
             services.AddScoped<ITokenService, TokenService>();
         }

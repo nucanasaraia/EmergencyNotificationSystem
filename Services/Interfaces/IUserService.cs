@@ -11,6 +11,5 @@ namespace EmergencyNotifRespons.Services.Interfaces
         Task<ApiResponse<string>> UpdateUser(int id, AddUser request);
         Task<ApiResponse<List<UserDto>>> GetAllUsers(ROLES_TYPE? role = null);
         Task<ApiResponse<string>> ChangeUserRole(int id, ROLES_TYPE type);
-        Task<ApiResponse<string>> ChangePassword(int id, string oldPassword, string newPassword);
     }
 }

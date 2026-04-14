@@ -4,8 +4,10 @@ using EmergencyNotifRespons.Data;
 using EmergencyNotifRespons.DTOs;
 using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Enums.Type;
+using EmergencyNotifRespons.Models;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace EmergencyNotifRespons.Services.Implementation
@@ -24,55 +26,144 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                //_currentuseer = request.CreatedById;
-                var emergencyEvent = _mapper.Map<EmergencyEventService>(request);
-                await _context.AddAsync(emergencyEvent);
+                var emergencyEvent = _mapper.Map<EmergencyEvent>(request);
+                await _context.EmergencyEvents.AddAsync(emergencyEvent);
                 await _context.SaveChangesAsync();
 
-                var result = _mapper.Map<EmergencyEventDto>(emergencyEvent);
-                return ApiResponseFactory.SuccessResponse(result, HttpStatusCode.OK);
+                var response = _mapper.Map<EmergencyEventDto>(emergencyEvent);
+                return ApiResponseFactory.Success(response);
             }
-            catch
+            catch (Exception ex)
             {
-                return ApiResponseFactory.ErrorResponse<EmergencyEventDto>(HttpStatusCode.BadRequest, "something went wrong");
+                return ApiResponseFactory.Fail<EmergencyEventDto>(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
         public async Task<ApiResponse<string>> DeleteEvent(int id)
         {
-            var emergencyEvent = await _context.EmergencyEvents.FindAsync(id);
-            if (emergencyEvent == null)
+            try
             {
-                
+                var existingEvent = await _context.EmergencyEvents.FirstOrDefaultAsync(e => e.Id == id);
+                if (existingEvent == null)
+                {
+                    return ApiResponseFactory.NotFound<string>();
+                }
+
+                _context.EmergencyEvents.Remove(existingEvent);
+                await _context.SaveChangesAsync();
+                return ApiResponseFactory.Success("Event deleted successfully");
             }
-
-            _context.EmergencyEvents.Remove(emergencyEvent);
-            await _context.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
 
-        public Task<ApiResponse<List<EmergencyEventDto>>> GetEmergencyEvents(EVENT_TYPE type)
+        public async Task<ApiResponse<List<EmergencyEventDto>>> GetActiveEvents(ACTIVITY_STATUS status = ACTIVITY_STATUS.ACTIVE)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var events = await _context.EmergencyEvents.Where(e => e.ACTIVITY_STATUS == status).ToListAsync();
+                var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
+                return ApiResponseFactory.Success(eventDtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<List<EmergencyEventDto>>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
 
-        public Task<ApiResponse<List<EmergencyEventDto>>> GetNearbyEmergencies(double latitude, double longitude, double radiusKm)
+        public async Task<ApiResponse<List<EmergencyEventDto>>> GetEmergencyEvents(EVENT_TYPE? type = null)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var events = await _context.EmergencyEvents
+                    .Where(e => e.EVENT_TYPE == type)
+                    .ToListAsync();
+
+                var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
+                return ApiResponseFactory.Success(eventDtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<List<EmergencyEventDto>>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
 
-        public Task<ApiResponse<EmergencyEventDto>> GetSpecificEvent(int id)
+        public async Task<ApiResponse<EmergencyEventDto>> GetEventById(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var emergencyEvent = await _context.EmergencyEvents.FirstOrDefaultAsync(e => e.Id == id);
+                if (emergencyEvent == null)
+                {
+                    return ApiResponseFactory.NotFound<EmergencyEventDto>();
+                }
+
+                var response = _mapper.Map<EmergencyEventDto>(emergencyEvent);
+                return ApiResponseFactory.Success(response);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<EmergencyEventDto>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
 
-        public Task<ApiResponse<string>> UpdateEvent(int id, AddEmergencyEvent request)
+        public async Task<ApiResponse<List<EmergencyEventDto>>> GetNearbyEvents(double latitude, double longitude, decimal affectedRadius)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var nearbyEvents = await _context.EmergencyEvents
+                    .Where(e => e.Latitude == latitude && e.Longitude == longitude && e.AffectedRadius == affectedRadius)
+                    .ToListAsync();
+
+                var eventDtos = _mapper.Map<List<EmergencyEventDto>>(nearbyEvents);
+                return ApiResponseFactory.Success(eventDtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<List<EmergencyEventDto>>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
 
-        public Task<ApiResponse<string>> UpdateEventStatus(int id, ACTIVITY_STATUS status)
+        public async Task<ApiResponse<string>> UpdateEvent(int id, AddEmergencyEvent request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var existingEvent = await _context.EmergencyEvents.FirstOrDefaultAsync(e => e.Id == id);
+                if (existingEvent == null)
+                {
+                    return ApiResponseFactory.NotFound<string>();
+                }
+
+                _mapper.Map(request, existingEvent);
+                await _context.SaveChangesAsync();
+                return ApiResponseFactory.Success("Event updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<string>> UpdateEventStatus(int id, ACTIVITY_STATUS status)
+        {
+            try
+            {
+                var existingEvent = await _context.EmergencyEvents.FirstOrDefaultAsync(e => e.Id == id);
+                if (existingEvent == null)
+                {
+                    return ApiResponseFactory.NotFound<string>();
+                }
+
+                existingEvent.ACTIVITY_STATUS = status;
+                await _context.SaveChangesAsync();
+                return ApiResponseFactory.Success("Event status updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }
