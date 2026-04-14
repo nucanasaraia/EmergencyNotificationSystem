@@ -13,6 +13,8 @@ namespace EmergencyNotifRespons.Data
         public DbSet<ResourceAssignment> ResourceAssignments { get; set; }
         public DbSet<Volunteer> Volunteers { get; set; }
         public DbSet<VolunteerAssignment> VolunteerAssignments { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
