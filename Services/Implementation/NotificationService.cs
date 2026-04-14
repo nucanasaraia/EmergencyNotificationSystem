@@ -2,7 +2,9 @@
 using EmergencyNotifRespons.CORE;
 using EmergencyNotifRespons.Data;
 using EmergencyNotifRespons.DTOs;
+using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Enums.Type;
+using EmergencyNotifRespons.Helpers;
 using EmergencyNotifRespons.Models;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
@@ -42,17 +44,10 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var notifications = await _context.EmergencyNotifications
-                .Include(n => n.UserNotifications)
-                .FirstOrDefaultAsync(n => n.UserNotifications.Any(un => un.UserId == userId && !un.IsRead));
+                var count = await _context.UserNotifications
+                    .CountAsync(un => un.UserId == userId && !un.IsRead);
 
-                if (notifications == null)
-                {
-                    return ApiResponseFactory.Success(0);
-                }
-
-                var response = notifications.UserNotifications.Count();
-                return ApiResponseFactory.Success(response);
+                return ApiResponseFactory.Success(count);
             }
             catch (Exception ex)
             {
@@ -130,19 +125,44 @@ namespace EmergencyNotifRespons.Services.Implementation
             {
                 var emergencyEvent = await _context.EmergencyEvents.FindAsync(eventId);
                 if (emergencyEvent == null)
-                {
                     return ApiResponseFactory.NotFound<string>();
-                }
 
                 var notification = _mapper.Map<EmergencyNotification>(request);
                 notification.EmergencyEventId = eventId;
+                notification.SentTime = DateTime.UtcNow;
                 _context.EmergencyNotifications.Add(notification);
                 await _context.SaveChangesAsync();
-                return ApiResponseFactory.Success("Notification sent successfully");
+
+                // fan-out: notify all users within the affected radius
+                var allUsers = await _context.Users.ToListAsync();
+                var usersInRadius = allUsers
+                    .Where(u => {
+                        var parts = u.Location?.Split(',');
+                        if (parts == null || parts.Length != 2) return false;
+                        if (!double.TryParse(parts[0], out var lat)) return false;
+                        if (!double.TryParse(parts[1], out var lon)) return false;
+                        return GeoHelper.GetDistance(emergencyEvent.Latitude, emergencyEvent.Longitude,
+                                                     lat, lon)
+                               <= (double)emergencyEvent.AffectedRadius;
+                    }).ToList();
+
+                var userNotifications = usersInRadius.Select(u => new UserNotification
+                {
+                    UserId = u.Id,
+                    NotificationId = notification.Id,
+                    IsRead = false,
+                    DeliveryStatus = DELIVERY_STATUS.NONE
+                }).ToList();
+
+                await _context.UserNotifications.AddRangeAsync(userNotifications);
+                await _context.SaveChangesAsync();
+
+                return ApiResponseFactory.Success($"Notification sent to {userNotifications.Count} users");
             }
             catch (Exception ex)
             {
-                return ApiResponseFactory.Fail<string>($"Error sending notification: {ex.Message}", HttpStatusCode.InternalServerError);
+                return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
             }
+        }
     }
 }

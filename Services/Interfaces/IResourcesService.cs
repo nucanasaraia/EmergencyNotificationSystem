@@ -12,7 +12,7 @@ namespace EmergencyNotifRespons.Services.Interfaces
         Task<ApiResponse<string>> UpdateResource(int id, AddResource request);
         Task<ApiResponse<string>> DeleteResource(int id);
         Task<ApiResponse<string>> AssignToEvent(int resourceId, int eventId, int assignedById);
-        Task<ApiResponse<ResourceDto>> ReturnResource(int assignmentId);
+        Task<ApiResponse<string>> ReturnResource(int assignmentId);
         Task<ApiResponse<List<ResourceDto>>> GetAvailableResources(RESOURCE_CATEGORY? category = null);
     }
 }

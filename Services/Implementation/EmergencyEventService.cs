@@ -4,6 +4,7 @@ using EmergencyNotifRespons.Data;
 using EmergencyNotifRespons.DTOs;
 using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Enums.Type;
+using EmergencyNotifRespons.Helpers;
 using EmergencyNotifRespons.Models;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
@@ -78,7 +79,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var events = await _context.EmergencyEvents
-                    .Where(e => e.EVENT_TYPE == type)
+                    .Where(e => type == null || e.EVENT_TYPE == type)
                     .ToListAsync();
 
                 var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
@@ -113,10 +114,11 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var nearbyEvents = await _context.EmergencyEvents
-                    .Where(e => e.Latitude == latitude && e.Longitude == longitude && e.AffectedRadius == affectedRadius)
-                    .ToListAsync();
-
+                var allEvents = await _context.EmergencyEvents.ToListAsync();
+                var nearbyEvents = allEvents
+                    .Where(e => GeoHelper.GetDistance(latitude, longitude, e.Latitude, e.Longitude)
+                                <= (double)affectedRadius)
+                    .ToList();
                 var eventDtos = _mapper.Map<List<EmergencyEventDto>>(nearbyEvents);
                 return ApiResponseFactory.Success(eventDtos);
             }

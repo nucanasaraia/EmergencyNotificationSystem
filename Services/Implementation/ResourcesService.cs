@@ -2,6 +2,7 @@
 using EmergencyNotifRespons.CORE;
 using EmergencyNotifRespons.Data;
 using EmergencyNotifRespons.DTOs;
+using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Enums.Type;
 using EmergencyNotifRespons.Models;
 using EmergencyNotifRespons.Requests;
@@ -26,19 +27,19 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var resource = await _context.Resources.FirstOrDefaultAsync(r => r.Id == resourceId);
-                if (resource == null)
-                {
-                    return ApiResponseFactory.NotFound<string>("Resource not found");
-                }
+                var eventExists = await _context.EmergencyEvents.AnyAsync(e => e.Id == eventId);
+                if (!eventExists)
+                    return ApiResponseFactory.NotFound<string>("Event not found");
 
-                resource.ResourceAssignments.Add(new ResourceAssignment
+                var assignment = new ResourceAssignment
                 {
+                    ResourceId = resourceId,
                     EmergencyEventId = eventId,
                     AssignedById = assignedById,
-                    AssignedTime = DateTime.UtcNow
-                });
-
+                    AssignedTime = DateTime.UtcNow,
+                    Status = STATUS2.NONE
+                };
+                await _context.ResourceAssignments.AddAsync(assignment);
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("Resource assigned to event successfully");
             }
@@ -90,8 +91,9 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var resources = await _context.Resources
-                .Where(r => r.Category == category)
-                .ToListAsync();
+                        .Where(r => category == null || r.Category == category)
+                        .ToListAsync();
+
                 if (resources == null || resources.Count == 0)
                 {
                     return ApiResponseFactory.NotFound<List<ResourceDto>>("No resources found");
@@ -125,24 +127,22 @@ namespace EmergencyNotifRespons.Services.Implementation
             }
         }
 
-        public async Task<ApiResponse<ResourceDto>> ReturnResource(int assignmentId)
+        public async Task<ApiResponse<string>> ReturnResource(int assignmentId)
         {
             try
             {
-                var resources = await _context.Resources
-               .Include(r => r.ResourceAssignments)
-               .FirstOrDefaultAsync(r => r.ResourceAssignments.Any(a => a.Id == assignmentId));
-                if (resources == null)
-                {
-                    return ApiResponseFactory.NotFound<ResourceDto>("Resource assignment not found");
-                }
+                var assignment = await _context.ResourceAssignments.FindAsync(assignmentId);
+                if (assignment == null)
+                    return ApiResponseFactory.NotFound<string>("Assignment not found");
 
-                var response = _mapper.Map<ResourceDto>(resources);
-                return ApiResponseFactory.Success(response, "Resource returned successfully");
+                assignment.ReturnedTime = DateTime.UtcNow;
+                assignment.Status = STATUS2.RETURNED; 
+                await _context.SaveChangesAsync();
+                return ApiResponseFactory.Success("Resource returned successfully");
             }
             catch (Exception ex)
             {
-                return ApiResponseFactory.Fail<ResourceDto>("An error occurred while returning resource: " + ex.Message, HttpStatusCode.InternalServerError);
+                return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
