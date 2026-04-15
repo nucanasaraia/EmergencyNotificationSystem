@@ -1,6 +1,17 @@
-﻿namespace EmergencyNotifRespons.DTOs
+﻿using EmergencyNotifRespons.Enums.Status;
+
+namespace EmergencyNotifRespons.DTOs
 {
     public class VolunteerDto
     {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Location { get; set; }
+        public string Skills { get; set; }
+        public string EmergencyContactPhone { get; set; }
+        public AVAILABILITY_STATUS AvailabilityStatus { get; set; }
     }
 }

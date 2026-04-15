@@ -79,6 +79,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var volunteer = await _context.Volunteers
+                        .Include(v => v.User)  
                         .FirstOrDefaultAsync(v => v.UserId == userId);
                 if (volunteer == null)
                 {
