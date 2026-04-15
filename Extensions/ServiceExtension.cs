@@ -13,8 +13,9 @@ namespace EmergencyNotifRespons.Extensions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVolunteerService, VolunteerService>();
             services.AddScoped<IResourcesService, ResourcesService>();
-            services.AddScoped<IUserService, MapService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IUserLoggerService, UserLoggerService>();
         }
     }
 }

@@ -1,6 +1,10 @@
 ﻿namespace EmergencyNotifRespons.Extensions
 {
-    public class ValidationExtension
+    public static class ValidationExtension
     {
+        public static void ConfigureValidation(this IServiceCollection services)
+        {
+
+        }
     }
 }
