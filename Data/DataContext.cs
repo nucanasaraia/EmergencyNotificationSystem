@@ -5,6 +5,8 @@ namespace EmergencyNotifRespons.Data
 {
     public class DataContext : DbContext
     {
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }
         public DbSet<EmergencyEvent> EmergencyEvents { get; set; }
@@ -16,21 +18,24 @@ namespace EmergencyNotifRespons.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(@"Data Source=(localdb)\ProjectModels;Initial Catalog=emgvol;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False");
-        }
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
-                .SelectMany(e => e.GetForeignKeys()))
-            {
-                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
-            }
 
-            base.OnModelCreating(modelBuilder);
+            //foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
+            //    .SelectMany(e => e.GetForeignKeys()))
+            //{
+            //    foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            //}
+
+            //base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>()
+              .HasIndex(u => u.Username)
+              .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }
