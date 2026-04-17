@@ -33,8 +33,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Middleware
-app.UseRateLimiter();
-
 app.UseAuthentication();
 app.UseAuthorization();
 

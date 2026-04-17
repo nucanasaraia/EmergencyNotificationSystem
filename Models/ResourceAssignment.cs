@@ -16,6 +16,6 @@ namespace EmergencyNotifRespons.Models
 
         public DateTime AssignedTime { get; set; }
         public DateTime? ReturnedTime { get; set; }
-        public STATUS2 Status { get; set; } = STATUS2.NONE;
+        public RESOURCE_ASSIGNMENT_STATUS Status { get; set; } = RESOURCE_ASSIGNMENT_STATUS.NONE;
     }
 }

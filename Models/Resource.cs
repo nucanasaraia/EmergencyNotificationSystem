@@ -11,7 +11,7 @@ namespace EmergencyNotifRespons.Models
         public int Quantity { get; set; }
         public RESOURCE_CATEGORY Category { get; set; } = RESOURCE_CATEGORY.PERSONNEL;
 
-        public STATUS Status { get; set; } = STATUS.NONE;
+        public RESOURCE_STATUS Status { get; set; } = RESOURCE_STATUS.NONE;
 
         public ICollection<ResourceAssignment> ResourceAssignments { get; set; }
     }

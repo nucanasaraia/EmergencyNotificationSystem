@@ -57,7 +57,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 await _emailService.SendVerificationCode(user.Email, user.Username, user.VerificationCode);
 
                 // Auto verify for demo purposes
-                user.EmailVerified = true;
+               // user.EmailVerified = true;
 
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
@@ -253,6 +253,26 @@ namespace EmergencyNotifRespons.Services.Implementation
             {
                 _logger.LogError(null, ex, "Unexpected error during password reset");
                 return ApiResponseFactory.ServerError<string>("An unexpected error occurred during password reset");
+            }
+        }
+
+        public async Task<ApiResponse<string>> Logout(string refreshToken)
+        {
+            try
+            {
+                var hash = _tokenService.HashToken(refreshToken);
+                var token = await _context.RefreshTokens
+                    .FirstOrDefaultAsync(t => t.TokenHash == hash);
+                if (token != null)
+                {
+                    token.IsRevoked = true;
+                    await _context.SaveChangesAsync();
+                }
+                return ApiResponseFactory.Success("Logged out successfully");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.ServerError<string>("Logout failed");
             }
         }
 

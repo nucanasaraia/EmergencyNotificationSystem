@@ -1,20 +1,29 @@
-﻿using EmergencyNotifRespons.Requests;
+﻿using EmergencyNotifRespons.Data;
+using EmergencyNotifRespons.Requests;
+using EmergencyNotifRespons.Services.Implementation;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace EmergencyNotifRespons.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly ITokenService _tokenService;
+        private readonly DataContext _context;
+        public AuthController(IAuthService authService, ITokenService tokenService, DataContext context)
         {
             _authService = authService;
+            _tokenService = tokenService;
+            _context = context;
         }
 
         [HttpPost("register")]
@@ -90,6 +99,18 @@ namespace EmergencyNotifRespons.Controllers
         {
             var result = await _authService.ResetPassword(request);
             return StatusCode((int)result.Status, result);
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(refreshToken))
+                await _authService.Logout(refreshToken);
+
+            Response.Cookies.Delete("refreshToken");
+            return Ok("Logged out");
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace EmergencyNotifRespons.Enums.Status
 {
-    public enum STATUS
+    public enum RESOURCE_STATUS
     {
         NONE,
         AVAILABLE,
@@ -8,14 +8,14 @@
         MAINTENANCE
     }
 
-    public enum STATUS2
+    public enum RESOURCE_ASSIGNMENT_STATUS
     {
         NONE,
         ASSIGNED,
         IN_USE,
         RETURNED
     }
-    public enum STATUS3
+    public enum VOLUNTEER_ASSIGNMENT_STATUS
     {
         ASSIGNED,
         ACCEPTED,

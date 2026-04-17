@@ -21,13 +21,13 @@ namespace EmergencyNotifRespons.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            //foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
-            //    .SelectMany(e => e.GetForeignKeys()))
-            //{
-            //    foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
-            //}
+            foreach (var foreignKey in modelBuilder.Model.GetEntityTypes()
+                .SelectMany(e => e.GetForeignKeys()))
+            {
+                foreignKey.DeleteBehavior = DeleteBehavior.Restrict;
+            }
 
-            //base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>()
               .HasIndex(u => u.Username)

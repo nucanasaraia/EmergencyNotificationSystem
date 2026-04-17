@@ -1,10 +1,13 @@
 ﻿using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EmergencyNotifRespons.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VolunteerController : ControllerBase
@@ -16,8 +19,9 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterAsVolunteer(int userId, AddVolunteer request)
+        public async Task<IActionResult> RegisterAsVolunteer([FromBody] AddVolunteer request)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _volunteerService.RegisterAsVolunteer(userId, request);
             return StatusCode((int)result.Status, result);
         }
@@ -30,7 +34,7 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPost("{volunteerId}/assign")]
-        public async Task<IActionResult> AssignToEvent(int volunteerId, int eventId, int assignedById)
+        public async Task<IActionResult> AssignToEvent(int volunteerId, [FromQuery] int eventId, [FromQuery] int assignedById)
         {
             var result = await _volunteerService.AssignToEvent(volunteerId, eventId, assignedById);
             return StatusCode((int)result.Status, result);
@@ -43,9 +47,10 @@ namespace EmergencyNotifRespons.Controllers
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetVolunteerProfile(int userId)
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetVolunteerProfile()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _volunteerService.GetVolunteerProfile(userId);
             return StatusCode((int)result.Status, result);
         }

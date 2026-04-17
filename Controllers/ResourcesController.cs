@@ -1,10 +1,12 @@
 ﻿using EmergencyNotifRespons.Enums.Type;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencyNotifRespons.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ResourcesController : ControllerBase
@@ -16,7 +18,7 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateResource(AddResource request)
+        public async Task<IActionResult> CreateResource([FromBody] AddResource request)
         {
             var result = await _resourcesService.CreateResource(request);
             return StatusCode((int)result.Status, result);

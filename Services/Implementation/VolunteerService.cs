@@ -64,7 +64,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 }
 
                 volunteerAssignment.CompletedTime = DateTime.UtcNow;
-                volunteerAssignment.Status = STATUS3.COMPLETED;
+                volunteerAssignment.Status = VOLUNTEER_ASSIGNMENT_STATUS.COMPLETED;
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("volunteer assignment completed successfully");
             }
@@ -116,7 +116,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var volunteer = _mapper.Map<Volunteer>(request);
-                volunteer.Id = userId;
+                volunteer.UserId = userId;
 
                 await _context.Volunteers.AddAsync(volunteer);
                 await _context.SaveChangesAsync();

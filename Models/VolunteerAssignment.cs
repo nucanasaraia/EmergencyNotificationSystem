@@ -15,6 +15,6 @@ namespace EmergencyNotifRespons.Models
 
         public DateTime AssignedTime { get; set; }
         public DateTime? CompletedTime { get; set; }
-        public STATUS3 Status { get; set; } = STATUS3.ACCEPTED;
+        public VOLUNTEER_ASSIGNMENT_STATUS Status { get; set; } = VOLUNTEER_ASSIGNMENT_STATUS.ACCEPTED;
     }
 }

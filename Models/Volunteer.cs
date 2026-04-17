@@ -11,7 +11,7 @@ namespace EmergencyNotifRespons.Models
         public User User { get; set; }
         public ICollection<VolunteerAssignment> VolunteerAssignments { get; set; }
        
-        public string skills { get; set; }
+        public string Skills { get; set; }
         public AVAILABILITY_STATUS AvailabilityStatus { get; set; } = AVAILABILITY_STATUS.AVAILABLE; // "Available", "Unavailable", "OnMission"
         public string EmergencyContactPhone { get; set; }
     }

@@ -37,7 +37,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                     EmergencyEventId = eventId,
                     AssignedById = assignedById,
                     AssignedTime = DateTime.UtcNow,
-                    Status = STATUS2.NONE
+                    Status = RESOURCE_ASSIGNMENT_STATUS.NONE
                 };
                 await _context.ResourceAssignments.AddAsync(assignment);
                 await _context.SaveChangesAsync();
@@ -136,7 +136,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                     return ApiResponseFactory.NotFound<string>("Assignment not found");
 
                 assignment.ReturnedTime = DateTime.UtcNow;
-                assignment.Status = STATUS2.RETURNED; 
+                assignment.Status = RESOURCE_ASSIGNMENT_STATUS.RETURNED; 
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("Resource returned successfully");
             }

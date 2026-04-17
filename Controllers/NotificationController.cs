@@ -1,10 +1,13 @@
 ﻿using EmergencyNotifRespons.Enums.Type;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EmergencyNotifRespons.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NotificationController : ControllerBase
@@ -24,21 +27,23 @@ namespace EmergencyNotifRespons.Controllers
 
         [HttpPost("mark-as-read/{notificationId}")]
         public async Task<IActionResult> MarkAsRead(int notificationId)
-        {
+        {   
             var result = await _notificationService.MarkAsRead(notificationId);
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpPost("mark-all-as-read/{userId}")]
-        public async Task<IActionResult> MarkAllAsRead(int userId)
+        [HttpPost("mark-all-as-read")]
+        public async Task<IActionResult> MarkAllAsRead()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _notificationService.MarkAllAsRead(userId);
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpGet("user-notifications/{userId}")]
-        public async Task<IActionResult> GetUserNotifications(int userId)
+        [HttpGet("user-notifications")]
+        public async Task<IActionResult> GetUserNotifications()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _notificationService.GetUserNotifications(userId);
             return StatusCode((int)result.Status, result);
         }
@@ -50,9 +55,10 @@ namespace EmergencyNotifRespons.Controllers
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpGet("unread-count/{userId}")]
-        public async Task<IActionResult> GetUnreadCount(int userId)
+        [HttpGet("unread-count")]
+        public async Task<IActionResult> GetUnreadCount()
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _notificationService.GetUnreadCount(userId);
             return StatusCode((int)result.Status, result);
         }

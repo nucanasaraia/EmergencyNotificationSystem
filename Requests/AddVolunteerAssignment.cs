@@ -9,6 +9,6 @@ namespace EmergencyNotifRespons.Requests
         public int EmergencyEventId { get; set; } // FK to EmergencyEvent
         public int AssignedById { get; set; } // FK to User
         public DateTime? CompletedTime { get; set; }
-        public STATUS3 Status { get; set; } = STATUS3.ACCEPTED;
+        public VOLUNTEER_ASSIGNMENT_STATUS Status { get; set; } = VOLUNTEER_ASSIGNMENT_STATUS.ACCEPTED;
     }
 }

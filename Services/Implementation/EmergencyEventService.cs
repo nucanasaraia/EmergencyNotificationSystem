@@ -64,7 +64,11 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var events = await _context.EmergencyEvents.Where(e => e.ACTIVITY_STATUS == status).ToListAsync();
+                var events = await _context.EmergencyEvents
+                    .Include(e => e.CreatedBy)   
+                    .Where(e => e.ACTIVITY_STATUS == status)
+                    .ToListAsync();
+
                 var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
                 return ApiResponseFactory.Success(eventDtos);
             }
@@ -79,9 +83,10 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var events = await _context.EmergencyEvents
+                    .Include(e => e.CreatedBy)   
                     .Where(e => type == null || e.EVENT_TYPE == type)
                     .ToListAsync();
-  
+
                 var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
                 return ApiResponseFactory.Success(eventDtos);
             }
@@ -95,7 +100,10 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var emergencyEvent = await _context.EmergencyEvents.FirstOrDefaultAsync(e => e.Id == id);
+                var emergencyEvent = await _context.EmergencyEvents
+                    .Include(e => e.CreatedBy)   
+                    .FirstOrDefaultAsync(e => e.Id == id);
+                
                 if (emergencyEvent == null)
                 {
                     return ApiResponseFactory.NotFound<EmergencyEventDto>();
@@ -114,7 +122,10 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var allEvents = await _context.EmergencyEvents.ToListAsync();
+                var allEvents = await _context.EmergencyEvents
+                    .Include(e => e.CreatedBy)   
+                    .ToListAsync();
+
                 var nearbyEvents = allEvents
                     .Where(e => GeoHelper.GetDistance(latitude, longitude, e.Latitude, e.Longitude)
                                 <= (double)affectedRadius)

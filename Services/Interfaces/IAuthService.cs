@@ -12,5 +12,6 @@ namespace EmergencyNotifRespons.Services.Interfaces
         Task<ApiResponse<AuthResponseDto>> RefreshToken(string refreshToken);
         Task<ApiResponse<string>> ForgotPassword(string email);
         Task<ApiResponse<string>> ResetPassword(PasswordResetRequest request);
+        Task<ApiResponse<string>> Logout(string refreshToken);
     }
 }

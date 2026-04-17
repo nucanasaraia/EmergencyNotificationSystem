@@ -10,6 +10,6 @@ namespace EmergencyNotifRespons.DTOs
         public string Description { get; set; }
         public int Quantity { get; set; }
         public RESOURCE_CATEGORY Category { get; set; }
-        public STATUS Status { get; set; }
+        public RESOURCE_STATUS Status { get; set; }
     }
 }

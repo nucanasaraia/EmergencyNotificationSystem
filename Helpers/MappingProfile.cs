@@ -41,6 +41,7 @@ namespace EmergencyNotifRespons.Helpers
             CreateMap<AddUSersNotifications, UserNotification>();
             CreateMap<UserNotification, NotificationDto>()
                 .ForMember(dest => dest.Message, opt => opt.MapFrom(src => src.Notification.Message))
+                .ForMember(dest => dest.EmergencyEventId, opt => opt.MapFrom(src => src.Notification.EmergencyEventId))
                 .ForMember(dest => dest.NotificationType, opt => opt.MapFrom(src => src.Notification.NotificationType))
                 .ForMember(dest => dest.SentTime, opt => opt.MapFrom(src => src.Notification.SentTime))
                 .ForMember(dest => dest.IsRead, opt => opt.MapFrom(src => src.IsRead));

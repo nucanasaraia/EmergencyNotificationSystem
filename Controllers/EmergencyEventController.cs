@@ -2,10 +2,12 @@
 using EmergencyNotifRespons.Enums.Type;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencyNotifRespons.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmergencyEventController : ControllerBase
@@ -17,7 +19,7 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateEvent(AddEmergencyEvent request)
+        public async Task<IActionResult> CreateEvent([FromBody] AddEmergencyEvent request)
         {
             var result = await _emergencyEventService.CreateEvent(request);
             return StatusCode((int)result.Status, result);
@@ -52,7 +54,7 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEvent(int id, AddEmergencyEvent request)
+        public async Task<IActionResult> UpdateEvent(int id, [FromBody] AddEmergencyEvent request)
         {
             var result = await _emergencyEventService.UpdateEvent(id, request);
             return StatusCode((int)result.Status, result);
@@ -65,6 +67,7 @@ namespace EmergencyNotifRespons.Controllers
             return StatusCode((int)result.Status, result);
         }
 
+        [Authorize(Roles = "ADMIN")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
