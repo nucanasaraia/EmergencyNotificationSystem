@@ -1,12 +1,6 @@
-﻿using AutoMapper;
-using EmergencyNotifRespons.CORE;
-using EmergencyNotifRespons.Data;
-using EmergencyNotifRespons.Enums.Status;
-using EmergencyNotifRespons.Enums.Type;
-using EmergencyNotifRespons.Models;
+﻿using EmergencyNotifRespons.Enums.Type;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmergencyNotifRespons.Controllers
@@ -15,99 +9,59 @@ namespace EmergencyNotifRespons.Controllers
     [ApiController]
     public class ResourcesController : ControllerBase
     {
-
-        private readonly DataContext _context;
-        private readonly IJWTService _jwtservice;
-        private readonly IMapper _mapper;
-
-
-        public ResourcesController(DataContext context, IJWTService jWTService, IMapper mapper)
+        private readonly IResourcesService _resourcesService;
+        public ResourcesController(IResourcesService resourcesService)
         {
-            _context = context;
-            _jwtservice = jWTService;
-            _mapper = mapper;
+            _resourcesService = resourcesService;
         }
 
-        [HttpPost("add-resources")]
-        public ActionResult AddResource(AddResource request)
+        [HttpPost]
+        public async Task<IActionResult> CreateResource(AddResource request)
         {
-
-            var resources = _mapper.Map<Resource>(request);
-            _context.Resources.Add(resources);
-            _context.SaveChanges();
-
-            return Ok(ApiResponseFactory.SuccessResponse("Resource Added Successfully"));
+            var result = await _resourcesService.CreateResource(request);
+            return StatusCode((int)result.Status, result);
         }
 
-        [HttpGet("get-resources")]
-        public ActionResult GetResources(RESOURCE_CATEGORY category)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetResourceById(int id)
         {
-            var resources = _context.Resources.Where(r => r.Category == category).ToList();
-
-            if (resources == null)
-            {
-                return BadRequest();
-            }
-
-            var resor = _mapper.Map<List<Resource>>(resources);
-            return Ok(resor);
+            var result = await _resourcesService.GetResourceById(id);
+            return StatusCode((int)result.Status, result);
         }
 
-        [HttpPut("change-resource/{id}")]
-        public ActionResult ChangeResource(int id, AddResource request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateResource(int id, AddResource request)
         {
-            var resource = _context.Resources.FirstOrDefault(r => r.Id == id);
-            if (resource == null)
-            {
-                return NotFound(ApiResponseFactory.NotFoundResponse("Resource Not Found"));
-            }
-
-            _mapper.Map(resource, request);
-            _context.SaveChanges();
-            return Ok(ApiResponseFactory.SuccessResponse("Resource Changed Successfully"));
+            var result = await _resourcesService.UpdateResource(id, request);
+            return StatusCode((int)result.Status, result);
         }
 
-        [HttpPost("add-resources/assignments")]
-        public ActionResult AddAssigment(AddResourceAssignment request)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteResource(int id)
         {
-            var resource = _context.Resources.Any(r => r.Id == request.ResourceId);
-            var events = _context.EmergencyEvents.Any(e => e.Id == request.EmergencyEventId);
-
-            if (!resource || !events)
-                return NotFound(ApiResponseFactory.NotFoundResponse("Resource or Emergency Event not found."));
-
-            var assignment = _mapper.Map<ResourceAssignment>(request);
-
-            assignment.AssignedById = _jwtservice.GetCurrentUserId();
-
-
-            if (assignment.AssignedTime == default)
-                assignment.AssignedTime = DateTime.UtcNow;
-
-            _context.ResourceAssignments.Add(assignment);
-            _context.SaveChanges();
-
-            return Ok(ApiResponseFactory.SuccessResponse("Rsource Assignment Added Successfully"));
+            var result = await _resourcesService.DeleteResource(id);
+            return StatusCode((int)result.Status, result);
         }
 
-
-        [HttpPut("resources/assignments/{id}/return")]
-        public ActionResult ReturnAssignment(int id)
+        [HttpPost("{resourceId}/assign")]  
+        public async Task<IActionResult> AssignToEvent(int resourceId, [FromQuery] int eventId, [FromQuery] int assignedById)
         {
-            var resourceAssignment = _context.ResourceAssignments.FirstOrDefault(r => r.Id == id);
-            if (resourceAssignment == null)
-            {
-                return NotFound(ApiResponseFactory.NotFoundResponse("Resource Assignment not found."));
-            }
-
-            resourceAssignment.Status = STATUS2.RETURNED;
-            resourceAssignment.ReturnedTime = DateTime.UtcNow;
-
-            _context.SaveChanges();
-
-            return Ok(ApiResponseFactory.SuccessResponse("Resource Assignment marked as returned successfully."));
+            var result = await _resourcesService.AssignToEvent(resourceId, eventId, assignedById);
+            return StatusCode((int)result.Status, result);
         }
 
+        [HttpPost("return/{assignmentId}")]
+        public async Task<IActionResult> ReturnResource(int assignmentId)
+        {
+            var result = await _resourcesService.ReturnResource(assignmentId);
+            return StatusCode((int)result.Status, result);
+        }
 
+        [HttpGet("available")]
+        public async Task<IActionResult> GetAvailableResources(RESOURCE_CATEGORY? category = null)
+        {
+            var result = await _resourcesService.GetAvailableResources(category);
+            return StatusCode((int)result.Status, result);
+        }
     }
 }

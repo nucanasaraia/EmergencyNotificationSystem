@@ -81,7 +81,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 var events = await _context.EmergencyEvents
                     .Where(e => type == null || e.EVENT_TYPE == type)
                     .ToListAsync();
-
+  
                 var eventDtos = _mapper.Map<List<EmergencyEventDto>>(events);
                 return ApiResponseFactory.Success(eventDtos);
             }

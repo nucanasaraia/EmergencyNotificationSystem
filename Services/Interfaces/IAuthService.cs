@@ -1,7 +1,6 @@
 ﻿using EmergencyNotifRespons.CORE;
 using EmergencyNotifRespons.DTOs;
 using EmergencyNotifRespons.Requests;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace EmergencyNotifRespons.Services.Interfaces
 {

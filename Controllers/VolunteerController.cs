@@ -1,14 +1,7 @@
-﻿using AutoMapper;
-using EmergencyNotifRespons.CORE;
-using EmergencyNotifRespons.Data;
-using EmergencyNotifRespons.DTOs;
-using EmergencyNotifRespons.Enums.Status;
-using EmergencyNotifRespons.Models;
+﻿using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EmergencyNotifRespons.Controllers
 {
@@ -16,117 +9,52 @@ namespace EmergencyNotifRespons.Controllers
     [ApiController]
     public class VolunteerController : ControllerBase
     {
-        private readonly DataContext _context;
-        private readonly IJWTService _jwtservice;
-        private readonly IMapper _mapper;
-
-
-        public VolunteerController(DataContext context, IJWTService jWTService, IMapper mapper)
+        private readonly IVolunteerService _volunteerService;
+        public VolunteerController(IVolunteerService volunteerService)
         {
-            _context = context;
-            _jwtservice = jWTService;
-            _mapper = mapper;
+            _volunteerService = volunteerService;
         }
 
-        [HttpPost("register-as-volunteer")]
-        public ActionResult RegisterVolunteer(AddVolunteer request)
+        [HttpPost]
+        public async Task<IActionResult> RegisterAsVolunteer(int userId, AddVolunteer request)
         {
-            var volunteer = _context.Volunteers.FirstOrDefault(v => v.Id == request.UserId);
-            if (volunteer == null)
-            {
-                return NotFound(ApiResponseFactory.NotFoundResponse("with this id Volunteer already exists"));
-            }
-
-            var vol = _mapper.Map<Volunteer>(request);
-
-            _context.Volunteers.Add(vol);
-            _context.SaveChanges();
-
-            var response = ApiResponseFactory.SuccessResponse("Succesfully Joined As Volunteer");
-            return Ok(response);
+            var result = await _volunteerService.RegisterAsVolunteer(userId, request);
+            return StatusCode((int)result.Status, result);
         }
 
-
-        [HttpGet("get-volunteers")]
-        public ActionResult GetVolunteerDetails()
+        [HttpPut("{volunteerId}/availability")]
+        public async Task<IActionResult> UpdateAvailability(int volunteerId, AVAILABILITY_STATUS status)
         {
-            var volunteers = _context.Volunteers
-                   .Include(v => v.User)
-                   .Select(v => v.User)
-                   .ToList();
-
-            if (!volunteers.Any())
-            {
-                var response = ApiResponseFactory.NotFoundResponse("Not Found");
-                return BadRequest(response);
-            }
-
-            var result = _mapper.Map<List<VolunteersDetailDto>>(volunteers);
-            return Ok(result);
+            var result = await _volunteerService.UpdateAvailability(volunteerId, status);
+            return StatusCode((int)result.Status, result);
         }
 
-
-        [HttpGet("get-specific-volunteer/{id}")]
-        public ActionResult GetSpecVol(int id)
+        [HttpPost("{volunteerId}/assign")]
+        public async Task<IActionResult> AssignToEvent(int volunteerId, int eventId, int assignedById)
         {
-            var volunteer = _context.Volunteers.FirstOrDefault(v => v.Id == id);
-            if (volunteer == null)
-            {
-                return BadRequest(ApiResponseFactory.NotFoundResponse("Volunteer Not Found"));
-            }
-
-            var result = _mapper.Map<List<VolunteersDetailDto>>(volunteer);
-            return Ok(result);
+            var result = await _volunteerService.AssignToEvent(volunteerId, eventId, assignedById);
+            return StatusCode((int)result.Status, result);
         }
 
-
-        [HttpPut("update-volunteer/{id}")]
-        public ActionResult UpdateVolunteer(int id, UpdateVolunteerDto request)
+        [HttpPost("{volunteerId}/complete")]
+        public async Task<IActionResult> CompleteAssignment(int volunteerId, int assignmentId)
         {
-            var volunteer = _context.Volunteers.FirstOrDefault(v => v.Id == id);
-            if (volunteer == null)
-            {
-                return BadRequest(ApiResponseFactory.NotFoundResponse("Volunteer Not Found"));
-            }
-
-            _mapper.Map(volunteer, request);
-            _context.SaveChanges();
-
-            var response = ApiResponseFactory.SuccessResponse("Volunteer Updated Succesfully");
-            return Ok(response);
+            var result = await _volunteerService.CompleteAssignment(volunteerId, assignmentId);
+            return StatusCode((int)result.Status, result);
         }
 
-
-        [HttpPut("update-volunteer-status/{id}")]
-        public ActionResult UpdateStatus(int id, AVAILABILITY_STATUS status)
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetVolunteerProfile(int userId)
         {
-            var vol = _context.Volunteers.FirstOrDefault(v => v.Id == id);
-            if (vol == null)
-            {
-                return BadRequest(ApiResponseFactory.NotFoundResponse("Volunteer Not Found"));
-            }
-
-            vol.AvailabilityStatus = status;
-            _context.SaveChanges();
-
-            var response = ApiResponseFactory.SuccessResponse("Successfully Changed Status");
-            return Ok(response);
+            var result = await _volunteerService.GetVolunteerProfile(userId);
+            return StatusCode((int)result.Status, result);
         }
 
-        [HttpDelete("delete-volunteer/{id}")]
-        public ActionResult DeleteStatus(int id) 
+        [HttpGet("availability/{status}")]
+        public async Task<IActionResult> GetVolunteersByAvailability(AVAILABILITY_STATUS status)
         {
-            var vol = _context.Volunteers.FirstOrDefault(v => v.Id == id);
-            if (vol == null)
-            {
-                return BadRequest(ApiResponseFactory.NotFoundResponse("Volunteer Not Found"));
-            }
-            _context.Volunteers.Remove(vol);
-            _context.SaveChanges();
-
-            var response = ApiResponseFactory.SuccessResponse("Deleted Successfully");
-            return Ok(response);
+            var result = await _volunteerService.GetVolunteersByAvailability(status);
+            return StatusCode((int)result.Status, result);
         }
-
     }
 }
