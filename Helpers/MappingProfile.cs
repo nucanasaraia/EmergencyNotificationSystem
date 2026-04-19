@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using EmergencyNotifRespons.DTOs;
+using EmergencyNotifRespons.Enums.Status;
 using EmergencyNotifRespons.Models;
 using EmergencyNotifRespons.Requests;
 
@@ -10,7 +11,7 @@ namespace EmergencyNotifRespons.Helpers
         public MappingProfile()
         {
             // User
-            CreateMap<User, AddUser>().ReverseMap();
+            CreateMap<User, UpdateUser>().ReverseMap();
             CreateMap<User, UserDto>();
 
             // Volunteer
@@ -28,10 +29,14 @@ namespace EmergencyNotifRespons.Helpers
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(src => src.User.Location));
 
             // EmergencyEvent
-            CreateMap<AddEmergencyEvent, EmergencyEvent>();
+            CreateMap<AddEmergencyEvent, EmergencyEvent>()
+                .ForMember(dest => dest.EVENT_TYPE, opt => opt.MapFrom(src => src.EventType))
+                .ForMember(dest => dest.ACTIVITY_STATUS, opt => opt.MapFrom(src => ACTIVITY_STATUS.ACTIVE));
             CreateMap<EmergencyEvent, EmergencyEventDto>()
+                .ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.EVENT_TYPE))
+                .ForMember(dest => dest.ActivityStatus, opt => opt.MapFrom(src => src.ACTIVITY_STATUS))
                 .ForMember(dest => dest.CreatedByName,
-                opt => opt.MapFrom(src => src.CreatedBy.FirstName + " " + src.CreatedBy.LastName));
+                    opt => opt.MapFrom(src => src.CreatedBy.FirstName + " " + src.CreatedBy.LastName));
 
             // EmergencyNotification
             CreateMap<AddNotifications, EmergencyNotification>();
@@ -47,7 +52,8 @@ namespace EmergencyNotifRespons.Helpers
                 .ForMember(dest => dest.IsRead, opt => opt.MapFrom(src => src.IsRead));
 
             // Resource
-            CreateMap<AddResource, Resource>();
+            CreateMap<AddResource, Resource>()
+                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category));
             CreateMap<Resource, ResourceDto>();
 
             CreateMap<AddResourceAssignment, ResourceAssignment>();

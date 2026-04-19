@@ -23,13 +23,19 @@ namespace EmergencyNotifRespons.Services.Implementation
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<EmergencyEventDto>> CreateEvent(AddEmergencyEvent request)
+        public async Task<ApiResponse<EmergencyEventDto>> CreateEvent(AddEmergencyEvent request, int createdById)
         {
             try
             {
                 var emergencyEvent = _mapper.Map<EmergencyEvent>(request);
+                emergencyEvent.CreatedById = createdById;
                 await _context.EmergencyEvents.AddAsync(emergencyEvent);
                 await _context.SaveChangesAsync();
+
+                // reload with CreatedBy included
+                await _context.Entry(emergencyEvent)
+                    .Reference(e => e.CreatedBy)
+                    .LoadAsync();
 
                 var response = _mapper.Map<EmergencyEventDto>(emergencyEvent);
                 return ApiResponseFactory.Success(response);

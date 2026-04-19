@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmergencyNotifRespons.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250607162116_init")]
-    partial class init
+    [Migration("20260419102322_MakeProfileFieldsNullable")]
+    partial class MakeProfileFieldsNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -107,6 +107,34 @@ namespace EmergencyNotifRespons.Migrations
                     b.ToTable("EmergencyNotifications");
                 });
 
+            modelBuilder.Entity("EmergencyNotifRespons.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("EmergencyNotifRespons.Models.Resource", b =>
                 {
                     b.Property<int>("Id")
@@ -174,65 +202,6 @@ namespace EmergencyNotifRespons.Migrations
                     b.ToTable("ResourceAssignments");
                 });
 
-            modelBuilder.Entity("EmergencyNotifRespons.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsEmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordResetCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("VerificationCode")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("EmergencyNotifRespons.Models.UserNotification", b =>
                 {
                     b.Property<int>("Id")
@@ -277,12 +246,12 @@ namespace EmergencyNotifRespons.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("skills")
+                    b.Property<string>("Skills")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -329,9 +298,79 @@ namespace EmergencyNotifRespons.Migrations
                     b.ToTable("VolunteerAssignments");
                 });
 
+            modelBuilder.Entity("User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("EmailVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordResetTokenHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("VerificationAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("VerificationCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("VerificationCodeExpires")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Username")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("EmergencyNotifRespons.Models.EmergencyEvent", b =>
                 {
-                    b.HasOne("EmergencyNotifRespons.Models.User", "CreatedBy")
+                    b.HasOne("User", "CreatedBy")
                         .WithMany("EmergencyEvents")
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -351,9 +390,20 @@ namespace EmergencyNotifRespons.Migrations
                     b.Navigation("EmergencyEvent");
                 });
 
+            modelBuilder.Entity("EmergencyNotifRespons.Models.RefreshToken", b =>
+                {
+                    b.HasOne("User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EmergencyNotifRespons.Models.ResourceAssignment", b =>
                 {
-                    b.HasOne("EmergencyNotifRespons.Models.User", "AssignedBy")
+                    b.HasOne("User", "AssignedBy")
                         .WithMany("ResourceAssignments")
                         .HasForeignKey("AssignedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -386,7 +436,7 @@ namespace EmergencyNotifRespons.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EmergencyNotifRespons.Models.User", "User")
+                    b.HasOne("User", "User")
                         .WithMany("UserNotifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -399,7 +449,7 @@ namespace EmergencyNotifRespons.Migrations
 
             modelBuilder.Entity("EmergencyNotifRespons.Models.Volunteer", b =>
                 {
-                    b.HasOne("EmergencyNotifRespons.Models.User", "User")
+                    b.HasOne("User", "User")
                         .WithOne("VolunteerProfile")
                         .HasForeignKey("EmergencyNotifRespons.Models.Volunteer", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -410,7 +460,7 @@ namespace EmergencyNotifRespons.Migrations
 
             modelBuilder.Entity("EmergencyNotifRespons.Models.VolunteerAssignment", b =>
                 {
-                    b.HasOne("EmergencyNotifRespons.Models.User", "AssignedBy")
+                    b.HasOne("User", "AssignedBy")
                         .WithMany("VolunteerAssignments")
                         .HasForeignKey("AssignedById")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -454,7 +504,12 @@ namespace EmergencyNotifRespons.Migrations
                     b.Navigation("ResourceAssignments");
                 });
 
-            modelBuilder.Entity("EmergencyNotifRespons.Models.User", b =>
+            modelBuilder.Entity("EmergencyNotifRespons.Models.Volunteer", b =>
+                {
+                    b.Navigation("VolunteerAssignments");
+                });
+
+            modelBuilder.Entity("User", b =>
                 {
                     b.Navigation("EmergencyEvents");
 
@@ -464,13 +519,7 @@ namespace EmergencyNotifRespons.Migrations
 
                     b.Navigation("VolunteerAssignments");
 
-                    b.Navigation("VolunteerProfile")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EmergencyNotifRespons.Models.Volunteer", b =>
-                {
-                    b.Navigation("VolunteerAssignments");
+                    b.Navigation("VolunteerProfile");
                 });
 #pragma warning restore 612, 618
         }

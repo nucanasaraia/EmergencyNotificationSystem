@@ -11,7 +11,6 @@ using System.Net;
 
 namespace EmergencyNotifRespons.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase

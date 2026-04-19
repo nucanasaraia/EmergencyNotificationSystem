@@ -23,7 +23,7 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, AddUser request)
+        public async Task<IActionResult> UpdateUser(int id, UpdateUser request)
         {
             var result = await _userService.UpdateUser(id, request);
             return StatusCode((int)result.Status, result);

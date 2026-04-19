@@ -9,7 +9,7 @@ namespace EmergencyNotifRespons.Services.Interfaces
     public interface IEmergencyEventService
     {
         Task<ApiResponse<EmergencyEventDto>> GetEventById(int id);
-        Task<ApiResponse<EmergencyEventDto>> CreateEvent(AddEmergencyEvent request);
+        Task<ApiResponse<EmergencyEventDto>> CreateEvent(AddEmergencyEvent request, int createdById);
         Task<ApiResponse<List<EmergencyEventDto>>> GetEmergencyEvents(EVENT_TYPE? type = null);
         Task<ApiResponse<List<EmergencyEventDto>>> GetActiveEvents(ACTIVITY_STATUS status = ACTIVITY_STATUS.ACTIVE);
         Task<ApiResponse<List<EmergencyEventDto>>> GetNearbyEvents(double latitude, double longitude, decimal affectedRadius);

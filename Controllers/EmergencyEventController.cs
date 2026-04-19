@@ -4,6 +4,7 @@ using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EmergencyNotifRespons.Controllers
 {
@@ -21,7 +22,8 @@ namespace EmergencyNotifRespons.Controllers
         [HttpPost()]
         public async Task<IActionResult> CreateEvent([FromBody] AddEmergencyEvent request)
         {
-            var result = await _emergencyEventService.CreateEvent(request);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var result = await _emergencyEventService.CreateEvent(request, userId);
             return StatusCode((int)result.Status, result);
         }
 

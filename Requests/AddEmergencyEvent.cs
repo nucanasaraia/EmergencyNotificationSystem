@@ -1,11 +1,12 @@
-﻿namespace EmergencyNotifRespons.Requests
+﻿using EmergencyNotifRespons.Enums.Type;
+
+namespace EmergencyNotifRespons.Requests
 {
     public class AddEmergencyEvent
     {
-        public int CreatedById { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string EventType { get; set; }
+        public EVENT_TYPE EventType { get; set; }
         public int Severity { get; set; }
         public string Location { get; set; }
         public double Latitude { get; set; }

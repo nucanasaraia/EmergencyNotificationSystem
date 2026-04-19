@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿    using Microsoft.OpenApi.Models;
 
 namespace EmergencyNotifRespons.Extensions
 {
@@ -10,6 +10,8 @@ namespace EmergencyNotifRespons.Extensions
 
             services.AddSwaggerGen(options =>
             {
+                options.UseInlineDefinitionsForEnums();
+
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",

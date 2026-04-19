@@ -31,14 +31,24 @@ namespace EmergencyNotifRespons.Services.Implementation
                 if (!eventExists)
                     return ApiResponseFactory.NotFound<string>("Event not found");
 
+                var resource = await _context.Resources.FindAsync(resourceId);
+                if (resource == null)
+                    return ApiResponseFactory.NotFound<string>("Resource not found");
+
+                if (resource.Status == RESOURCE_STATUS.IN_USE)
+                    return ApiResponseFactory.BadRequest<string>("Resource is already in use");
+
                 var assignment = new ResourceAssignment
                 {
                     ResourceId = resourceId,
                     EmergencyEventId = eventId,
                     AssignedById = assignedById,
                     AssignedTime = DateTime.UtcNow,
-                    Status = RESOURCE_ASSIGNMENT_STATUS.NONE
+                    Status = RESOURCE_ASSIGNMENT_STATUS.ASSIGNED
                 };
+
+                resource.Status = RESOURCE_STATUS.IN_USE;
+
                 await _context.ResourceAssignments.AddAsync(assignment);
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("Resource assigned to event successfully");
@@ -48,6 +58,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 return ApiResponseFactory.Fail<string>("An error occurred while assigning resource to event: " + ex.Message, HttpStatusCode.InternalServerError);
             }
         }
+
 
         public async Task<ApiResponse<ResourceDto>> CreateResource(AddResource request)
         {
@@ -70,11 +81,20 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
-                var resource = await _context.Resources.FirstOrDefaultAsync(r => r.Id == id);
+                var resource = await _context.Resources
+                    .Include(r => r.ResourceAssignments)
+                    .FirstOrDefaultAsync(r => r.Id == id);
+
                 if (resource == null)
-                {
                     return ApiResponseFactory.NotFound<string>("Resource not found");
-                }
+
+                if (resource.ResourceAssignments != null &&
+                    resource.ResourceAssignments.Any(a => a.Status != RESOURCE_ASSIGNMENT_STATUS.RETURNED))
+                    return ApiResponseFactory.BadRequest<string>(
+                        "Cannot delete resource with active assignments. Return the resource first.");
+
+                if (resource.ResourceAssignments != null)
+                    _context.ResourceAssignments.RemoveRange(resource.ResourceAssignments);
 
                 _context.Resources.Remove(resource);
                 await _context.SaveChangesAsync();
@@ -82,7 +102,8 @@ namespace EmergencyNotifRespons.Services.Implementation
             }
             catch (Exception ex)
             {
-                return ApiResponseFactory.Fail<string>("An error occurred while deleting resource: " + ex.Message, HttpStatusCode.InternalServerError);
+                return ApiResponseFactory.Fail<string>("An error occurred while deleting resource: "
+                    + ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
@@ -135,14 +156,44 @@ namespace EmergencyNotifRespons.Services.Implementation
                 if (assignment == null)
                     return ApiResponseFactory.NotFound<string>("Assignment not found");
 
+                var resource = await _context.Resources.FindAsync(assignment.ResourceId);
+                if (resource != null)
+                    resource.Status = RESOURCE_STATUS.AVAILABLE;
+
                 assignment.ReturnedTime = DateTime.UtcNow;
-                assignment.Status = RESOURCE_ASSIGNMENT_STATUS.RETURNED; 
+                assignment.Status = RESOURCE_ASSIGNMENT_STATUS.RETURNED;
+
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("Resource returned successfully");
             }
             catch (Exception ex)
             {
                 return ApiResponseFactory.Fail<string>(ex.Message, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        public async Task<ApiResponse<List<ResourceAssignmentDto>>> GetResourceAssignments(int resourceId)
+        {
+            try
+            {
+                var assignments = await _context.ResourceAssignments
+                    .Where(a => a.ResourceId == resourceId)
+                    .ToListAsync();
+
+                return ApiResponseFactory.Success(assignments.Select(a => new ResourceAssignmentDto
+                {
+                    Id = a.Id,
+                    ResourceId = a.ResourceId,
+                    EmergencyEventId = a.EmergencyEventId,
+                    AssignedTime = a.AssignedTime,
+                    ReturnedTime = a.ReturnedTime,
+                    Status = a.Status == RESOURCE_ASSIGNMENT_STATUS.ASSIGNED ? RESOURCE_STATUS.IN_USE : RESOURCE_STATUS.AVAILABLE
+                }).ToList());
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.Fail<List<ResourceAssignmentDto>>(
+                    ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 

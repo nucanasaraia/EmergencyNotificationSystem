@@ -76,7 +76,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             }
         }
 
-        public async Task<ApiResponse<string>> UpdateUser(int id, AddUser request)
+        public async Task<ApiResponse<string>> UpdateUser(int id, UpdateUser request)
         {
             try
             {

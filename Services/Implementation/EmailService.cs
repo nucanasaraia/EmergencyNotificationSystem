@@ -68,7 +68,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             using var smtpClient = new SmtpClient(_smtp.Host)
             {
                 Port = _smtp.Port,
-                EnableSsl = _smtp.EnableSSl,
+                EnableSsl = _smtp.EnableSSL,
                 Credentials = new NetworkCredential(_smtp.SenderEmail, _smtp.AppPassword)
             };
 

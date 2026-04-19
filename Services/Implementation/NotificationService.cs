@@ -89,6 +89,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 foreach (var notification in notifications)
                 {
                     notification.IsRead = true;
+                    notification.DeliveryStatus = DELIVERY_STATUS.DELIVERED;  
                 }
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("All notifications marked as read");
@@ -110,6 +111,8 @@ namespace EmergencyNotifRespons.Services.Implementation
                 }
 
                 notification.IsRead = true;
+                notification.DeliveryStatus = DELIVERY_STATUS.DELIVERED;  
+
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("Notification marked as read");
             }
@@ -137,12 +140,9 @@ namespace EmergencyNotifRespons.Services.Implementation
                 var allUsers = await _context.Users.ToListAsync();
                 var usersInRadius = allUsers
                     .Where(u => {
-                        var parts = u.Location?.Split(',');
-                        if (parts == null || parts.Length != 2) return false;
-                        if (!double.TryParse(parts[0], out var lat)) return false;
-                        if (!double.TryParse(parts[1], out var lon)) return false;
+                        if (u.Latitude == null || u.Longitude == null) return false;
                         return GeoHelper.GetDistance(emergencyEvent.Latitude, emergencyEvent.Longitude,
-                                                     lat, lon)
+                                                     u.Latitude.Value, u.Longitude.Value)
                                <= (double)emergencyEvent.AffectedRadius;
                     }).ToList();
 
@@ -151,7 +151,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                     UserId = u.Id,
                     NotificationId = notification.Id,
                     IsRead = false,
-                    DeliveryStatus = DELIVERY_STATUS.NONE
+                    DeliveryStatus = DELIVERY_STATUS.SENT
                 }).ToList();
 
                 await _context.UserNotifications.AddRangeAsync(userNotifications);

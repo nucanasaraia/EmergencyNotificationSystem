@@ -7,6 +7,6 @@
         public required string SenderEmail { get; set; }
         public required string SenderName { get; set; }
         public required string AppPassword { get; set; }
-        public bool EnableSSl { get; set; }
+        public bool EnableSSL { get; set; }
     }
 }

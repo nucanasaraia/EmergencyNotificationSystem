@@ -3,6 +3,7 @@ using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace EmergencyNotifRespons.Controllers
 {
@@ -45,9 +46,10 @@ namespace EmergencyNotifRespons.Controllers
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpPost("{resourceId}/assign")]  
-        public async Task<IActionResult> AssignToEvent(int resourceId, [FromQuery] int eventId, [FromQuery] int assignedById)
+        [HttpPost("{resourceId}/assign")]
+        public async Task<IActionResult> AssignToEvent(int resourceId, [FromQuery] int eventId)
         {
+            var assignedById = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _resourcesService.AssignToEvent(resourceId, eventId, assignedById);
             return StatusCode((int)result.Status, result);
         }
@@ -56,6 +58,13 @@ namespace EmergencyNotifRespons.Controllers
         public async Task<IActionResult> ReturnResource(int assignmentId)
         {
             var result = await _resourcesService.ReturnResource(assignmentId);
+            return StatusCode((int)result.Status, result);
+        }
+
+        [HttpGet("{resourceId}/assignments")]
+        public async Task<IActionResult> GetResourceAssignments(int resourceId)
+        {
+            var result = await _resourcesService.GetResourceAssignments(resourceId);
             return StatusCode((int)result.Status, result);
         }
 

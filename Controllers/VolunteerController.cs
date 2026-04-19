@@ -34,8 +34,9 @@ namespace EmergencyNotifRespons.Controllers
         }
 
         [HttpPost("{volunteerId}/assign")]
-        public async Task<IActionResult> AssignToEvent(int volunteerId, [FromQuery] int eventId, [FromQuery] int assignedById)
+        public async Task<IActionResult> AssignToEvent(int volunteerId, [FromQuery] int eventId)
         {
+            var assignedById = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var result = await _volunteerService.AssignToEvent(volunteerId, eventId, assignedById);
             return StatusCode((int)result.Status, result);
         }

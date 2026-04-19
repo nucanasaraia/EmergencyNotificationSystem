@@ -8,7 +8,7 @@ namespace EmergencyNotifRespons.Services.Interfaces
     public interface IUserService
     {
         Task<ApiResponse<UserDto>> GetUserById(int id);
-        Task<ApiResponse<string>> UpdateUser(int id, AddUser request);
+        Task<ApiResponse<string>> UpdateUser(int id, UpdateUser request);
         Task<ApiResponse<List<UserDto>>> GetAllUsers(ROLES_TYPE? role = null);
         Task<ApiResponse<string>> ChangeUserRole(int id, ROLES_TYPE type);
     }

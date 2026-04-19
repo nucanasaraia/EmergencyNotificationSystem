@@ -12,7 +12,13 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter(
+                System.Text.Json.JsonNamingPolicy.SnakeCaseUpper)); 
+    });
 builder.Services.ConfigureDatabase(builder.Configuration);
 builder.Services.ConfigureServices();
 builder.Services.ConfigureSwagger();

@@ -9,7 +9,7 @@ namespace EmergencyNotifRespons.Requests
         public string Name { get; set; }
         public string Description { get; set; }
         public int Quantity { get; set; }
-        public RESOURCE_CATEGORY Cateory { get; set; } = RESOURCE_CATEGORY.PERSONNEL;
+        public RESOURCE_CATEGORY Category { get; set; } = RESOURCE_CATEGORY.PERSONNEL;
 
     }
 }

@@ -35,12 +35,19 @@ namespace EmergencyNotifRespons.Services.Implementation
                     return ApiResponseFactory.NotFound<string>("volunteer not found");
                 }
 
+                if (volunteer.AvailabilityStatus == AVAILABILITY_STATUS.ON_MISSION ||
+                    volunteer.AvailabilityStatus == AVAILABILITY_STATUS.UNAVAILABLE)
+                {
+                    return ApiResponseFactory.BadRequest<string>("Volunteer is not available for assignment");
+                }
+
                 volunteer.VolunteerAssignments.Add(new VolunteerAssignment
                 {
                     EmergencyEventId = eventId,
                     AssignedById = assignedById,
                     AssignedTime = DateTime.UtcNow,
                 });
+                volunteer.AvailabilityStatus = AVAILABILITY_STATUS.ON_MISSION; 
 
                 await _context.SaveChangesAsync();
                 return ApiResponseFactory.Success("volunteer assigned to event successfully");
@@ -99,6 +106,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var volunteers = await _context.Volunteers
+                    .Include(v => v.User)   
                     .Where(v => v.AvailabilityStatus == status)
                     .ToListAsync();
 
@@ -115,16 +123,21 @@ namespace EmergencyNotifRespons.Services.Implementation
         {
             try
             {
+                var existing = await _context.Volunteers.AnyAsync(v => v.UserId == userId);
+                if (existing)
+                    return ApiResponseFactory.Conflict<string>("User is already registered as a volunteer");
+
                 var volunteer = _mapper.Map<Volunteer>(request);
                 volunteer.UserId = userId;
 
                 await _context.Volunteers.AddAsync(volunteer);
                 await _context.SaveChangesAsync();
-                return ApiResponseFactory.Success("volunteer registered successfully");
+                return ApiResponseFactory.Success("Volunteer registered successfully");
             }
             catch (Exception ex)
             {
-                return ApiResponseFactory.Fail<string>("An error occurred while registering volunteer: " + ex.Message, HttpStatusCode.InternalServerError);
+                return ApiResponseFactory.Fail<string>("An error occurred while registering volunteer: "
+                    + ex.Message, HttpStatusCode.InternalServerError);
             }
         }
 
