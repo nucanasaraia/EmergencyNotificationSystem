@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace EmergencyNotifRespons.Data
 {
@@ -11,11 +12,9 @@ namespace EmergencyNotifRespons.Data
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
-
             var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-            optionsBuilder.UseSqlServer(
+            optionsBuilder.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"));
-
             return new DataContext(optionsBuilder.Options);
         }
     }

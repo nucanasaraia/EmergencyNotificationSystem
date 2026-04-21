@@ -11,12 +11,18 @@ namespace EmergencyNotifRespons.Extensions
         public static IServiceCollection ConfigureJwt(this IServiceCollection services, IConfiguration configuration)
         {
             // Validate configuration values
-            var jwtKey = configuration["Jwt:Key"]
-                ?? throw new InvalidOperationException("JWT Key is not configured.");
-            var jwtIssuer = configuration["Jwt:Issuer"]
-                ?? throw new InvalidOperationException("JWT Issuer is not configured.");
-            var jwtAudience = configuration["Jwt:Audience"]
-                ?? throw new InvalidOperationException("JWT Audience is not configured.");
+            var jwtKey = configuration["Jwt:Key"];
+            var jwtIssuer = configuration["Jwt:Issuer"];
+            var jwtAudience = configuration["Jwt:Audience"];
+
+            if (string.IsNullOrWhiteSpace(jwtKey))
+                throw new InvalidOperationException("JWT Key missing.");
+
+            if (string.IsNullOrWhiteSpace(jwtIssuer))
+                throw new InvalidOperationException("JWT Issuer missing.");
+
+            if (string.IsNullOrWhiteSpace(jwtAudience))
+                throw new InvalidOperationException("JWT Audience missing.");
 
             var key = Encoding.UTF8.GetBytes(jwtKey);
 

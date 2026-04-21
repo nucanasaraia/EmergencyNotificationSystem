@@ -7,6 +7,7 @@ using EmergencyNotifRespons.Requests;
 using EmergencyNotifRespons.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace EmergencyNotifRespons.Services.Implementation
@@ -33,6 +34,7 @@ namespace EmergencyNotifRespons.Services.Implementation
             try
             {
                 var email = request.Email.Trim().ToLower();
+
                 if (await _context.Users.AnyAsync(x => x.Email == email))
                 {
                     _logger.LogWarning(null, "Registration failed - email already exists: {Email}", email);
@@ -45,7 +47,7 @@ namespace EmergencyNotifRespons.Services.Implementation
                 {
                     Username = request.Username,
                     Email = email,
-                    PasswordHash = _passwordHasher.HashPassword(null!, request.Password),
+                    PasswordHash = _passwordHasher.HashPassword(new User(), request.Password),
                     Role = request.Role == ROLES_TYPE.ADMIN ? ROLES_TYPE.CITIZEN : request.Role,
                     CreatedAt = DateTime.UtcNow,
                     IsActive = true,
@@ -53,22 +55,25 @@ namespace EmergencyNotifRespons.Services.Implementation
                     VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10)
                 };
 
-                // Email service disabled in demo - works locally with Gmail SMTP
-                await _emailService.SendVerificationCode(user.Email, user.Username, user.VerificationCode);
-
-                // Auto verify for demo purposes
-               // user.EmailVerified = true;
-
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
 
+                // Send verification email
+                await _emailService.SendVerificationCode(email, user.Username, verificationCode);
+
                 _logger.LogInfo(user, "New user registered: {Email}", email);
-                return ApiResponseFactory.Success("Registration successful. Verify email.");
+                return ApiResponseFactory.Success("Registration successful");
             }
             catch (Exception ex)
             {
-                _logger.LogError(null, ex, "Unexpected error during registration");
-                return ApiResponseFactory.ServerError<string>("An unexpected error occurred during registration");
+                _logger.LogError(null, ex, "Registration failed during registration");
+
+                return new ApiResponse<string>
+                {
+                    Status = HttpStatusCode.InternalServerError,
+                    Message = ex.ToString(),   
+                    Data = null
+                };
             }
         }
 
