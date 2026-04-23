@@ -235,9 +235,8 @@ https://localhost:{port}/swagger
 
 # 🌐 Live Demo
 
-```text
 https://emergencynotif-dkaqbkebh0hbhuh5.westeurope-01.azurewebsites.net/swagger/index.html
-```
+
 Fully deployed on Azure App Service with Neon PostgreSQL database.
 ---
 
